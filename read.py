@@ -7,6 +7,7 @@ import json
 from pyproj import Proj, transform
 from pyproj import CRS, Transformer
 import mgrs  # Import the MGRS conversion library
+import yaml
 
 class ImprovedMGRSArrowTool:
     def __init__(self):
@@ -50,11 +51,17 @@ class ImprovedMGRSArrowTool:
                     
                     # Convert to UTM/MGRS - for the starting point
                     mgrs_coord = self.latlon_to_mgrs(start[1], start[0])
+
+                    mgrs_head= mgrs_coord[0:4]
+                    x = mgrs_coord[5:10]
+                    y = mgrs_coord[10:16]
                     
                     results.append({
                         'lat': start[1],
                         'lon': start[0],
-                        'mgrs': mgrs_coord,
+                        'mgrs_x': x,
+                        'mgrs_y': y,
+                        'mgrs_head': mgrs_head,
                         'heading_degrees': heading
                     })
         
@@ -90,10 +97,24 @@ class ImprovedMGRSArrowTool:
         
         qx = 0.0
         qy = 0.0
-        qz = math.sin(heading_rad / 2)
-        qw = math.cos(heading_rad / 2)
+        qz = math.cos(heading_rad / 2)
+        qw = math.sin(heading_rad / 2)
         
         return [qx, qy, qz, qw]
+
+
+    def save_to_yaml(arrow, filename):
+        data = {
+            'position_x': arrow['mgrs_x'],
+            'position_y': arrow['mgrs_y'],
+            'position_z': 0.0,
+            'orientation_x': self.heading_to_quaternion(arrow['heading_degrees'])[0],
+            'orientation_y': self.heading_to_quaternion(arrow['heading_degrees'])[1],
+            'orientation_z': self.heading_to_quaternion(arrow['heading_degrees'])[2],
+            'orientation_w': self.heading_to_quaternion(arrow['heading_degrees'])[3]
+        }
+        with open(filename, 'w') as yaml_file:
+            yaml.dump(data, yaml_file, default_flow_style=False)
     
     def display_coordinate_results(self):
         """Display coordinates and heading for the starting points of arrows"""
@@ -104,10 +125,29 @@ class ImprovedMGRSArrowTool:
         print("\n===== Coordinates for Arrow Starting Points =====")
         for i, arrow in enumerate(self.arrows):
             print(f"\nArrow {i+1}:")
-            print(f"Latitude, Longitude: {arrow['lat']:.6f}, {arrow['lon']:.6f}")
-            print(f"UTM/MGRS: {arrow['mgrs']}")
-            # print(f"Heading: {arrow['heading_degrees']:.2f}°")
-            print(f"Quaternion: {self.heading_to_quaternion(arrow['heading_degrees'])}")
+            # print(f"Latitude, Longitude: {arrow['lat']:.6f}, {arrow['lon']:.6f}")
+            print(f"position_x: {arrow['mgrs_x']}")
+            print(f"position_y: {arrow['mgrs_y']}")
+            print(f"position_z: 0.0")
+            print(f"orientation_x: {self.heading_to_quaternion(arrow['heading_degrees'])[0]}")
+            print(f"orientation_y: {self.heading_to_quaternion(arrow['heading_degrees'])[1]}")
+            print(f"orientation_z: {self.heading_to_quaternion(arrow['heading_degrees'])[2]}")
+            print(f"orientation_w: {self.heading_to_quaternion(arrow['heading_degrees'])[3]}")
+
+            data = {
+            "position_x": float(arrow['mgrs_x']),
+            "position_y": float(arrow['mgrs_y']),
+            "position_z": 0.0,
+            "orientation_x": self.heading_to_quaternion(arrow['heading_degrees'])[0],
+            "orientation_y": self.heading_to_quaternion(arrow['heading_degrees'])[1],
+            "orientation_z": self.heading_to_quaternion(arrow['heading_degrees'])[2],
+            "orientation_w": self.heading_to_quaternion(arrow['heading_degrees'])[3],
+            }
+            with open("test.yaml", 'w') as yaml_file:
+                yaml.dump(data, yaml_file, default_flow_style=False)
+
+            # self.save_to_yaml(arrow, 'output.yaml')
+
     
 if __name__ == "__main__":
 
