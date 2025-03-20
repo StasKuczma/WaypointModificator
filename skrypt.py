@@ -17,11 +17,11 @@ class FileWatcher(FileSystemEventHandler):
 
     def on_created(self, event):
         if event.src_path.endswith(self.filename):
-            print(f"Detected new file: {event.src_path}")
-            time.sleep(1)  # Allow time for file writing to complete
+            print(f"Wykryto nowy plik: {event.src_path}")
+            time.sleep(1)
             self.tool.process_arrows(event.src_path)
             self.tool.display_coordinate_results()
-            os._exit(0)  # Exit after processing
+            os._exit(0) 
 
 class ImprovedMGRSArrowTool:
     def __init__(self):
@@ -36,42 +36,28 @@ class ImprovedMGRSArrowTool:
     
     def load_data(self, filename):
 
-        yaml_file = "goals_list.yaml"  # Update with your actual file path
+        yaml_file = "goals_list.yaml" 
         mgrs_converter = mgrs.MGRS()
         with open(yaml_file, "r") as file:
             data = yaml.safe_load(file)
-        # Determine the center of the map (first coordinate)
-        # map_center = [52.705681, 16.396344]
-        # mymap = folium.Map(location=map_center, zoom_start=15)
 
         def mgrs_to_latlon(self, mgrs_coord):
-            """Convert MGRS coordinate back to latitude and longitude."""
             try:
                 lat, lon = self.mgrs_converter.toLatLon(mgrs_coord)
-                return lat, lon  # Returns (latitude, longitude)
+                return lat, lon 
             except Exception as e:
                 return f"Error: {str(e)}"
         number=0
 
         data_push = []
         for point in data:
-
-
             position_x = int(point["position_x"])
             position_y = int(point["position_y"])
-
             position_x_str = str(position_x)
             position_y_str = str(position_y)
-            # print(int(point["position_x"]),int(point["position_y"]))//
-
             coordinate='33UWU'+position_x_str+position_y_str
-
-            # print(coordinate)
             lat,lon = mgrs_converter.toLatLon(coordinate)
-
             data_push.append([lat, lon, number])
-
-
             number+=1
         return data_push
 
@@ -101,7 +87,7 @@ class ImprovedMGRSArrowTool:
             if feature['geometry']['type'] == 'LineString':
                 coords = feature['geometry']['coordinates']
                 if len(coords) >= 2:
-                    start = coords[0]  # [lon, lat]
+                    start = coords[0] 
                     end = coords[-1]
                     heading = self.calculate_heading([start[1], start[0]], [end[1], end[0]])
                     mgrs_coord = self.latlon_to_mgrs(start[1], start[0])
