@@ -1,11 +1,6 @@
 import folium.plugins
-import folium
-import math
 import webbrowser
 import os
-import json
-from pyproj import Proj, transform
-from pyproj import CRS, Transformer
 import mgrs 
 
 class ImprovedMGRSArrowTool:
