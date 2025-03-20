@@ -85,12 +85,13 @@ class ImprovedMGRSArrowTool:
         """Convert heading in degrees to quaternion.
         This creates a quaternion representing rotation around the Z axis."""
         # Convert heading to radians
-        heading_rad = math.radians(heading_degrees)
+        # heading_rad = math.radians(heading_degrees)
+        heading_rad = math.radians(heading_degrees + 90)
         
         qx = 0.0
         qy = 0.0
-        qz = math.cos(heading_rad / 2)
-        qw = math.sin(heading_rad / 2)
+        qz = math.sin(heading_rad / 2)
+        qw = math.cos(heading_rad / 2)
         
         return [qx, qy, qz, qw]
     
